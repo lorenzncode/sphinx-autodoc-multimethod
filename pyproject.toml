@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "sphinx-autodoc-multimethod"
+version = "0.1.0a0"
+description = "A Sphinx extension for autodoc with projects using multimethod."
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python",
+    "Framework :: Sphinx :: Extension",
+]
+license = "Apache-2.0"
+authors = ["Lorenz Neureuter <hello@lorenz.space>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Sphinx = "^4.5.0"
+multimethod = "1.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^22.3.0"
+mypy = "^0.960"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
