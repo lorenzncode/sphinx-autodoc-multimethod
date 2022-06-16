@@ -1,7 +1,7 @@
-import re
 from types import ModuleType
 from typing import Any, List, Tuple, ValuesView
 from multimethod import multimethod
+import re
 
 from sphinx.ext.autosummary import Autosummary
 from sphinx.ext.autosummary import (
@@ -172,10 +172,8 @@ class MultimethodAutosummary(Autosummary):
             try:
                 sig = documenter.format_signature(show_annotation=False)
                 # -- multimethod customization
-                if isinstance(obj, multimethod) and len(obj) > 0:
-                    dispatchmeth = get_first(obj)
-                    if inspect.isfunction(dispatchmeth):
-                        sig = "()"
+                if isinstance(obj, multimethod):
+                    sig = "(...)"
                 # -- end customization
             except TypeError:
                 # the documenter does not support ``show_annotation`` option
@@ -301,7 +299,7 @@ class MethodDocumenter(SphinxMethodDocumenter):
 def setup(app):
 
     app.connect("autodoc-process-docstring", process_docstring_multimethod)
-    app.add_directive("autosummary", MultimethodAutosummary)
+    app.add_directive("autosummary", MultimethodAutosummary, override=True)
     app.add_autodocumenter(MethodDocumenter, override=True)
 
     return {"parallel_read_safe": True, "parallel_write_safe": True}
