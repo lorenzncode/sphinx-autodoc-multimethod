@@ -21,13 +21,14 @@ def do_autodoc(app, objtype, name, options=None):
 
     return bridge.result
 
+
 def max_empty_lines(lines, n: int = 2):
     """Allow maximum of n consecutive empty lines to be insensive to small changes in whitespace.
     Found difference with multimethod 1.6 vs 1.8.
     """
 
     lines_replace = []
-    for k, g in groupby(lines,  lambda l: not(l.strip())):
+    for k, g in groupby(lines, lambda l: not (l.strip())):
         g = list(g)
         if g[0] == "" and len(g) > n:
             lines_replace.extend(g[0:n])
@@ -36,11 +37,12 @@ def max_empty_lines(lines, n: int = 2):
 
     return lines_replace
 
+
 @pytest.mark.sphinx("html", testroot="multimethod")
 def test_multimethod(app):
     options = {"members": None}
     actual = do_autodoc(app, "module", "target.multi", options)
-    #actual = max_empty_lines(actual)
+    # actual = max_empty_lines(actual)
     assert list(actual)[0:10] == [
         "",
         ".. py:module:: target.multi",
@@ -102,6 +104,49 @@ def test_multimethod_fieldlist(app):
     ]
 
 
+@pytest.mark.sphinx("html", testroot="multimethod")
+def test_multiline_param_desc(app):
+    options = {"members": None}
+    actual = do_autodoc(app, "module", "target.multiline_param_desc", options)
+    assert list(actual)[0:10] == [
+        "",
+        ".. py:module:: target.multiline_param_desc",
+        "",
+        "",
+        ".. py:class:: Foo()",
+        "   :module: target.multiline_param_desc",
+        "",
+        "   class docstring",
+        "",
+        "",
+    ]
+    assert re.match(
+        r"   .. py:method:: Foo.foobar\(p1: \w+, p2: \w+\) -> int", actual[10]
+    )
+    assert re.match(
+        r"                  Foo.foobar\(p1: \w+, p2: \w+\) -> int", actual[11]
+    )
+    assert list(actual)[12:] == [
+        "      :module: target.multiline_param_desc",
+        "",
+        "      Docstring on first method.",
+        "",
+        "      :param p1: p1 definition",
+        "      :param p2: long p2 definition that continues",
+        "                 on next line",
+        "",
+        "",
+        "",
+        "",
+        "      more doc here",
+        "",
+        "",
+    ]
+
+
+@pytest.mark.skip(
+    reason="customization to insert self removed, if needed add to a separate autodoc-process-docstring event"
+)
 @pytest.mark.sphinx("html", testroot="multimethod")
 def test_multimethod_insert_self(app):
     options = {"members": None}
@@ -212,6 +257,7 @@ def test_multimethod_classmethod(app):
         "",
     ]
 
+
 @pytest.mark.sphinx("html", testroot="multimethod")
 def test_multimethod_staticmethodnew(app):
     options = {"members": None}
@@ -257,6 +303,62 @@ def test_multimethod_staticmethodnew(app):
     )
     assert list(actual)[22:30] == [
         "      :module: target.staticmethod",
+        "      :staticmethod:",
+        "",
+        "      Docstring on first method.",
+        "",
+        "      :param p1: p1 definition",
+        "      :param p2: p2 definition",
+        "",
+    ]
+
+
+@pytest.mark.sphinx("html", testroot="multimethod")
+def test_multimethod_notpending(app):
+    options = {"members": None}
+    actual = do_autodoc(app, "module", "target.notpending", options)
+    actual = max_empty_lines(actual)
+    assert list(actual)[0:10] == [
+        "",
+        ".. py:module:: target.notpending",
+        "",
+        "",
+        ".. py:class:: Foo()",
+        "   :module: target.notpending",
+        "",
+        "   class docstring",
+        "",
+        "",
+    ]
+    assert re.match(r"   .. py:method:: Foo.foobar\(p1: \w+, p2: \w+\)", actual[10])
+    assert re.match(r"                  Foo.foobar\(p1: \w+, p2: \w+\)", actual[11])
+    assert list(actual)[12:21] == [
+        "      :module: target.notpending",
+        "      :classmethod:",
+        "",
+        "      Docstring on first method.",
+        "",
+        "      :param p1: p1 definition",
+        "      :param p2: p2 definition",
+        "",
+        "",
+    ]
+    assert re.match(r"   .. py:method:: Foo.foobar2\(p1: \w+, p2: \w+\)", actual[21])
+    assert re.match(r"                  Foo.foobar2\(p1: \w+, p2: \w+\)", actual[22])
+    assert list(actual)[23:31] == [
+        "      :module: target.notpending",
+        "",
+        "      Docstring on first method.",
+        "",
+        "      :param p1: p1 definition",
+        "      :param p2: p2 definition",
+        "",
+        "",
+    ]
+    assert re.match(r"   .. py:method:: Foo.foobar3\(p1: \w+, p2: \w+\)", actual[31])
+    assert re.match(r"                  Foo.foobar3\(p1: \w+, p2: \w+\)", actual[32])
+    assert list(actual)[33:41] == [
+        "      :module: target.notpending",
         "      :staticmethod:",
         "",
         "      Docstring on first method.",
